@@ -7,12 +7,11 @@ import {
 } from './model';
 export function drawPersonalization(
   ctx: CanvasRenderingContext2D,
-  name: string,
   url: string,
   placement: Placement,
 ) {
   const p = normalizePlacement(placement);
-  const code = QRCode.create(url, { errorCorrectionLevel: 'M' });
+  const code = QRCode.create(url, { errorCorrectionLevel: 'H' });
   const modules = code.modules.size,
     cell = Math.floor(p.size / (modules + 8)),
     qrSize = cell * (modules + 8);
@@ -22,7 +21,7 @@ export function drawPersonalization(
     top = p.y + Math.floor((p.size - qrSize) / 2);
   ctx.imageSmoothingEnabled = false;
   ctx.fillStyle = '#ffffff';
-  ctx.fillRect(p.x, p.y, p.size, p.size + 38);
+  ctx.fillRect(p.x, p.y, p.size, p.size);
   ctx.fillStyle = '#000000';
   for (let row = 0; row < modules; row++)
     for (let column = 0; column < modules; column++)
@@ -33,41 +32,26 @@ export function drawPersonalization(
           cell,
           cell,
         );
+  // A small white-backed monogram, with high error correction to retain scan reliability.
+  const centerX = left + qrSize / 2;
+  const centerY = top + qrSize / 2;
+  const fontSize = Math.round(qrSize * 0.105);
+  ctx.font = `bold ${fontSize}px Georgia`;
+  const logoWidth = Math.ceil(ctx.measureText('P&C').width) + 10;
+  const logoHeight = fontSize + 12;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(
+    Math.floor(centerX - logoWidth / 2),
+    Math.floor(centerY - logoHeight / 2),
+    logoWidth,
+    logoHeight,
+  );
   ctx.fillStyle = '#193f42';
   ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  const words = name.split(/\s+/);
-  let lines: string[] = [''];
-  ctx.font = '18px Georgia';
-  for (const word of words) {
-    const last = lines.length - 1,
-      test = lines[last] ? `${lines[last]} ${word}` : word;
-    if (ctx.measureText(test).width <= p.size - 12) lines[last] = test;
-    else if (lines[last]) lines.push(word);
-    else lines[last] = word;
-  }
-  if (lines.length > 2) lines = [name];
-  let fontSize = 18;
-  while (
-    fontSize > 12 &&
-    lines.some((line) => ctx.measureText(line).width > p.size - 12)
-  ) {
-    fontSize--;
-    ctx.font = `${fontSize}px Georgia`;
-  }
-  for (const [i, line] of lines.entries())
-    ctx.fillText(
-      line,
-      p.x + p.size / 2,
-      p.y + p.size + 2 + i * 18,
-      p.size - 12,
-    );
+  ctx.textBaseline = 'middle';
+  ctx.fillText('P&C', centerX, centerY + 1);
 }
-export async function createInvitation(
-  name: string,
-  url: string,
-  placement: Placement,
-) {
+export async function createInvitation(url: string, placement: Placement) {
   const canvas = document.createElement('canvas');
   canvas.width = IMAGE_WIDTH;
   canvas.height = IMAGE_HEIGHT;
@@ -77,7 +61,7 @@ export async function createInvitation(
   img.src = '/invitation.png';
   await img.decode();
   ctx.drawImage(img, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
-  drawPersonalization(ctx, name, url, placement);
+  drawPersonalization(ctx, url, placement);
   return canvas;
 }
 export function canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {

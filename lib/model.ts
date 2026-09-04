@@ -19,7 +19,7 @@ export function normalizePlacement(value: Placement): Placement {
   return {
     size,
     x: Math.round(Math.max(0, Math.min(IMAGE_WIDTH - size, value.x))),
-    y: Math.round(Math.max(0, Math.min(IMAGE_HEIGHT - size - 38, value.y))),
+    y: Math.round(Math.max(0, Math.min(IMAGE_HEIGHT - size, value.y))),
   };
 }
 export function canonicalGuest(row: GuestInput) {

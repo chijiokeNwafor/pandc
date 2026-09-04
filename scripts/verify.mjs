@@ -25,7 +25,7 @@ assert.equal(parseGuestCsv('name,name\nA,A').fatal, true);
 assert.equal(parseGuestCsv('name\n' + 'A\n'.repeat(1001)).fatal, true);
 assert.deepEqual(normalizePlacement({ x: 9999, y: 9999, size: 200 }), {
   x: 942,
-  y: 1362,
+  y: 1400,
   size: 200,
 });
 console.log(
@@ -168,7 +168,7 @@ for (const [i, guest] of fixture.entries()) {
     ctx = canvas.getContext('2d');
   ctx.drawImage(original, 0, 0);
   const url = `${hosted}/pass/${guest.token}`;
-  drawPersonalization(ctx, guest.name, url, DEFAULT_PLACEMENT);
+  drawPersonalization(ctx, url, DEFAULT_PLACEMENT);
   const pixels = ctx.getImageData(0, 0, 1142, 1600);
   const decoded = jsQR(new Uint8ClampedArray(pixels.data), 1142, 1600);
   assert.equal(
@@ -183,7 +183,7 @@ for (const [i, guest] of fixture.entries()) {
     const data = bctx.getImageData(0, 0, 1142, 1600).data;
     for (let y = 0; y < 1600; y++)
       for (let x = 0; x < 1142; x++) {
-        if (x >= 840 && x < 1040 && y >= 1308 && y < 1546) continue;
+        if (x >= 840 && x < 1040 && y >= 1308 && y < 1508) continue;
         const pos = (y * 1142 + x) * 4;
         for (let c = 0; c < 4; c++)
           assert.equal(

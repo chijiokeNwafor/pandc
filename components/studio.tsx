@@ -136,11 +136,7 @@ export default function Studio({
       return;
     }
     let cancelled = false;
-    createInvitation(
-      selected.name,
-      `${origin}/pass/${selected.token}`,
-      placement,
-    )
+    createInvitation(`${origin}/pass/${selected.token}`, placement)
       .then((canvas) => {
         if (cancelled) return;
         setImageError('');
@@ -231,7 +227,6 @@ export default function Studio({
     setExportProgress(0);
     try {
       const canvas = await createInvitation(
-        selected.name,
         `${origin}/pass/${selected.token}`,
         placement,
       );
@@ -262,7 +257,6 @@ export default function Studio({
       });
       for (const [i, guest] of guests.entries()) {
         const canvas = await createInvitation(
-          guest.name,
           `${origin}/pass/${guest.token}`,
           placement,
         );
@@ -594,7 +588,7 @@ export default function Studio({
                       key === 'x'
                         ? IMAGE_WIDTH - placement.size
                         : key === 'y'
-                          ? IMAGE_HEIGHT - placement.size - 38
+                          ? IMAGE_HEIGHT - placement.size
                           : 360
                     }
                     step={1}
@@ -613,7 +607,7 @@ export default function Studio({
                       key === 'x'
                         ? IMAGE_WIDTH - placement.size
                         : key === 'y'
-                          ? IMAGE_HEIGHT - placement.size - 38
+                          ? IMAGE_HEIGHT - placement.size
                           : 360
                     }
                     value={placement[key]}
