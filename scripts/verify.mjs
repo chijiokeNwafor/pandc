@@ -7,7 +7,7 @@ import { drawPersonalization } from '../lib/invitation.ts';
 import { DEFAULT_PLACEMENT, normalizePlacement } from '../lib/model.ts';
 const origin = 'http://localhost:3000';
 const hosted =
-  'https://princess-chijioke-invitations.peachy-kiwi-7794.chatgpt.site';
+  'https://princess-chijioke-invitations.saxxone.chatgpt.site';
 const sample = await fs.readFile('public/sample-guests.csv', 'utf8');
 const parsed = parseGuestCsv(sample);
 assert.equal(parsed.rows.length, 9);

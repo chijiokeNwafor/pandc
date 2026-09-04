@@ -12,7 +12,7 @@ const source = createCanvas(1142, 1600),
 sourceCtx.drawImage(image, 0, 0);
 const baseline = sourceCtx.getImageData(0, 0, 1142, 1600).data;
 for (const [index, guest] of guests.entries()) {
-  const url = `https://princess-chijioke-invitations.peachy-kiwi-7794.chatgpt.site/pass/${guest.token}`;
+  const url = `https://princess-chijioke-invitations.saxxone.chatgpt.site/pass/${guest.token}`;
   for (const size of [180, 200, 360]) {
     const canvas = createCanvas(1142, 1600),
       ctx = canvas.getContext('2d');
