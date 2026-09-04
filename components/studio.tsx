@@ -298,6 +298,9 @@ export default function Studio({
           <span>THE WEDDING COLLECTION</span>
         </a>
         <div className="topbar-right">
+          <a className="studio-site-link" href="/">
+            Wedding website <ArrowUpRight size={14} />
+          </a>
           <span className="event-date">
             18 DECEMBER 2026 <i /> LAGOS
           </span>

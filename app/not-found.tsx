@@ -5,9 +5,9 @@ export default function NotFound() {
       <section className="pass-card">
         <div className="pass-state">
           <h1>Page not found</h1>
-          <p>Check your invitation link or return to the studio.</p>
+          <p>Check your invitation link or return to the wedding website.</p>
           <Link className="signin-button" href="/">
-            Invitation studio
+            Back to home
           </Link>
         </div>
       </section>

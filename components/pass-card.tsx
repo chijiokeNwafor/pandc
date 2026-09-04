@@ -238,7 +238,7 @@ export default function PassCard({
           </a>
         )}
         {ready && state.canCheckIn && (
-          <a href="/">
+          <a href="/organizer">
             Back to guest list <ArrowUpRight size={13} />
           </a>
         )}
