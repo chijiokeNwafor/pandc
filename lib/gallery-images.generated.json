@@ -1,10 +1,18 @@
 [
   {
-    "id": "gallery/DSC_7800.jpg.jpeg",
-    "src": "/gallery/DSC_7800.jpg.jpeg",
+    "id": "gallery/02-our-honeymoon.jpeg",
+    "src": "/gallery/02-our-honeymoon.jpeg",
     "width": 2624,
     "height": 3936,
-    "title": "DSC 7800.jpg",
-    "alt": "DSC 7800.jpg"
+    "title": "Our honeymoon",
+    "alt": "Our honeymoon"
+  },
+  {
+    "id": "gallery/03-introduction-native-outfit.jpeg",
+    "src": "/gallery/03-introduction-native-outfit.jpeg",
+    "width": 1130,
+    "height": 1414,
+    "title": "Introduction native outfit",
+    "alt": "Introduction native outfit"
   }
 ]
