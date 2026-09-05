@@ -1,5 +1,4 @@
-import { env } from 'cloudflare:workers';
-import { getChatGPTUser, type ChatGPTUser } from '../app/chatgpt-auth';
+import { getSessionUser, type SessionUser } from './session';
 import { getDb } from '../db';
 export class HttpError extends Error {
   constructor(
@@ -9,16 +8,16 @@ export class HttpError extends Error {
     super(message);
   }
 }
-export async function isOrganizer(user: ChatGPTUser | null) {
-  // Bootstrap is pinned to the verified Site owner's email in server configuration.
+export async function isOrganizer(user: SessionUser | null) {
+  // Organizer access is pinned to the configured admin email.
   // There is no public "claim this site" endpoint or first-visitor ownership rule.
-  const configuredEmail = env.OWNER_EMAIL?.trim().toLowerCase();
+  const configuredEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
   if (!configuredEmail)
     throw new Error('The organizer account has not been configured.');
   const db = getDb();
   await db
     .prepare(
-      'INSERT INTO organizer (id,email,initialized_at) VALUES (1,?,?) ON CONFLICT(id) DO NOTHING',
+      'INSERT INTO organizer (id,email,initialized_at) VALUES (1,$1,$2) ON CONFLICT(id) DO NOTHING',
     )
     .bind(configuredEmail, new Date().toISOString())
     .run();
@@ -33,7 +32,7 @@ export async function isOrganizer(user: ChatGPTUser | null) {
   if (!owner.user_id)
     await db
       .prepare(
-        'UPDATE organizer SET user_id=? WHERE id=1 AND user_id IS NULL AND email=?',
+        'UPDATE organizer SET user_id=$1 WHERE id=1 AND user_id IS NULL AND email=$2',
       )
       .bind(user.userId, owner.email)
       .run();
@@ -43,7 +42,7 @@ export async function isOrganizer(user: ChatGPTUser | null) {
   return bound?.user_id === user.userId;
 }
 export async function requireOrganizer() {
-  const user = await getChatGPTUser();
+  const user = await getSessionUser();
   if (!user)
     throw new HttpError(
       401,
@@ -54,7 +53,7 @@ export async function requireOrganizer() {
   return user;
 }
 export function canonicalOrigin() {
-  const value = env.SITE_ORIGIN;
+  const value = process.env.SITE_ORIGIN;
   if (!value)
     throw new Error('The invitation address has not been configured.');
   const url = new URL(value);

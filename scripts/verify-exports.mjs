@@ -3,6 +3,8 @@ import fs from 'node:fs/promises';
 import { createCanvas, loadImage } from '@napi-rs/canvas';
 import jsQR from 'jsqr';
 import { drawPersonalization } from '../lib/invitation.ts';
+if (!process.env.SITE_ORIGIN) throw new Error('Set SITE_ORIGIN to the deployment origin.');
+const origin = new URL(process.env.SITE_ORIGIN).origin;
 const { guests } = JSON.parse(
   await fs.readFile('work/verification.json', 'utf8'),
 );
@@ -12,7 +14,7 @@ const source = createCanvas(1142, 1600),
 sourceCtx.drawImage(image, 0, 0);
 const baseline = sourceCtx.getImageData(0, 0, 1142, 1600).data;
 for (const [index, guest] of guests.entries()) {
-  const url = `https://princess-chijioke-invitations.saxxone.chatgpt.site/pass/${guest.token}`;
+  const url = `${origin}/pass/${guest.token}`;
   for (const size of [180, 200, 360]) {
     const canvas = createCanvas(1142, 1600),
       ctx = canvas.getContext('2d');

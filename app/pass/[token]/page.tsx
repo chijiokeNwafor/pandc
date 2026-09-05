@@ -1,5 +1,5 @@
 import PassCard from '@/components/pass-card';
-import { chatGPTSignInPath } from '@/app/chatgpt-auth';
+import { signInPath } from '@/lib/session';
 export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'Wedding Entry Pass | Princess & Chijioke',
@@ -15,7 +15,7 @@ export default async function PassPage({
     <PassCard
       key={token}
       token={token}
-      signInPath={chatGPTSignInPath(`/pass/${token}`)}
+      signInPath={signInPath(`/pass/${token}`)}
     />
   );
 }

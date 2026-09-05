@@ -8,6 +8,13 @@
       "when": 1788563668820,
       "tag": "0000_stale_susan_delgado",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788563668821,
+      "tag": "0001_login_attempts",
+      "breakpoints": true
     }
   ]
 }

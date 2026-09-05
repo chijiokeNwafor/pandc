@@ -307,7 +307,7 @@ export default function Studio({
           {signedIn && (
             <a
               className="signout"
-              href="/signout-with-chatgpt?return_to=/"
+              href="/api/auth/signout?callbackUrl=/"
               target="_top"
             >
               Sign out
@@ -418,7 +418,7 @@ export default function Studio({
                 <p>You can preview a CSV before signing in.</p>
                 {!signedIn && (
                   <a className="inline-signin" href={signInPath} target="_top">
-                    Sign in with ChatGPT <ArrowUpRight size={15} />
+                    Organizer sign in <ArrowUpRight size={15} />
                   </a>
                 )}
               </div>

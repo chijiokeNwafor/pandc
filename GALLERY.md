@@ -17,8 +17,8 @@ public/gallery/
 - Remove a photo from this folder to remove it from the gallery. Rename it to change its caption or order.
 - Photos retain their original bytes and dimensions. Resize very large photos before adding them to keep the gallery quick to load.
 
-Run `npm run dev` for the local preview. Adding, changing, or removing photos refreshes the gallery automatically. A production build (`npm run build`) also discovers the folder from scratch. **Publish a new Sites version to put your new photos on the live website.** Copying files into the local folder alone does not change the published site.
+Run `npm run dev` for the local preview. After adding, changing, or removing photos, run `npm run gallery:refresh` or restart the dev server. A production build (`npm run build`) also discovers the folder from scratch. **Deploy a new Vercel version to put your new photos on the live website.** Copying files into the local folder alone does not change the published site.
 
-`lib/gallery-images.generated.json` is generated automatically; do not maintain it by hand. `npm run gallery:refresh` can refresh it without starting the website. Keep this generated file with your source when saving a Sites version.
+`lib/gallery-images.generated.json` is generated automatically; do not maintain it by hand. `npm run gallery:refresh` can refresh it without starting the website. Keep this generated file with your source when committing changes.
 
 All files in `public/` are public website assets. Only place photos there that you want guests to be able to see.

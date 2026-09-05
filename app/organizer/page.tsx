@@ -1,10 +1,10 @@
 import Studio from '@/components/studio';
-import { getChatGPTUser, chatGPTSignInPath } from '../chatgpt-auth';
+import { getSessionUser, signInPath } from '@/lib/session';
 import { isOrganizer } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Invitation Studio | Princess & Chijioke' };
 export default async function Organizer() {
-  const user = await getChatGPTUser();
+  const user = await getSessionUser();
   let owner = false,
     initialError = '';
   try {
@@ -17,7 +17,7 @@ export default async function Organizer() {
     <Studio
       owner={owner}
       signedIn={Boolean(user)}
-      signInPath={chatGPTSignInPath('/organizer')}
+      signInPath={signInPath('/organizer')}
       initialError={initialError}
     />
   );

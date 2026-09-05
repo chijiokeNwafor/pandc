@@ -1,4 +1,4 @@
-import { getChatGPTUser } from '@/app/chatgpt-auth';
+import { getSessionUser } from '@/lib/session';
 import { isOrganizer } from '@/lib/auth';
 import { readPass } from '@/lib/store';
 import { validToken } from '@/lib/model';
@@ -13,7 +13,7 @@ export async function GET(
     if (!validToken(token)) return json({ error: 'Invalid pass' }, 404);
     const pass = await readPass(token);
     if (!pass) return json({ error: 'Invalid pass' }, 404);
-    const user = await getChatGPTUser();
+    const user = await getSessionUser();
     return json({ pass, canCheckIn: user ? await isOrganizer(user) : false });
   } catch (error) {
     return failure(error);

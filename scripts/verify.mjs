@@ -5,9 +5,12 @@ import jsQR from 'jsqr';
 import { parseGuestCsv } from '../lib/csv.ts';
 import { drawPersonalization } from '../lib/invitation.ts';
 import { DEFAULT_PLACEMENT, normalizePlacement } from '../lib/model.ts';
-const origin = 'http://localhost:3000';
-const hosted =
-  'https://princess-chijioke-invitations.saxxone.chatgpt.site';
+const origin = process.env.TEST_ORIGIN;
+assert.ok(
+  origin && process.env.TEST_ADMIN_PASSWORD,
+  'Run npm test against the isolated test server.',
+);
+const hosted = origin;
 const sample = await fs.readFile('public/sample-guests.csv', 'utf8');
 const parsed = parseGuestCsv(sample);
 assert.equal(parsed.rows.length, 9);
@@ -31,11 +34,36 @@ assert.deepEqual(normalizePlacement({ x: 9999, y: 9999, size: 200 }), {
 console.log(
   'PASS CSV validation: BOM, quotes, blank rows, duplicates, missing names, malformed headers and limits',
 );
-const signin = await fetch(`${origin}/signin-with-chatgpt?return_to=/`, {
-  redirect: 'manual',
-});
-assert.equal(signin.status, 302);
-const cookie = signin.headers.get('set-cookie').split(';')[0];
+const csrfResponse = await fetch(`${origin}/api/auth/csrf`);
+const { csrfToken } = await csrfResponse.json();
+const csrfCookies = csrfResponse.headers
+  .getSetCookie()
+  .map((c) => c.split(';')[0])
+  .join('; ');
+async function login(password) {
+  return fetch(`${origin}/api/auth/callback/credentials`, {
+    method: 'POST',
+    redirect: 'manual',
+    headers: {
+      Cookie: csrfCookies,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      csrfToken,
+      email: process.env.ADMIN_EMAIL,
+      password,
+      callbackUrl: `${origin}/organizer`,
+    }),
+  });
+}
+const rejected = await login('incorrect-password');
+assert.match(rejected.headers.get('location'), /error=CredentialsSignin/);
+const signin = await login(process.env.TEST_ADMIN_PASSWORD);
+const cookie = signin.headers
+  .getSetCookie()
+  .map((c) => c.split(';')[0])
+  .join('; ');
+assert.match(cookie, /authjs.session-token=/);
 const headers = { Cookie: cookie, Origin: origin, 'Content-Type': 'text/csv' };
 let response = await fetch(`${origin}/api/guests`);
 assert.equal(response.status, 401);
@@ -162,6 +190,7 @@ assert.equal(settings.status, 200);
 console.log(
   'PASS check-in: merely opening a pass does not consume it; exactly one of six simultaneous confirmations succeeds; status survives reupload',
 );
+await fs.mkdir('work/test-invitations', { recursive: true });
 const original = await loadImage('public/invitation.png');
 for (const [i, guest] of fixture.entries()) {
   const canvas = createCanvas(1142, 1600),
@@ -211,4 +240,45 @@ await fs.writeFile(
     null,
     2,
   ),
+);
+// A valid password must also be rejected once the shared login budget is exhausted.
+const { default: pg } = await import('pg');
+const testDb = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+try {
+  await testDb.query({
+    text: 'UPDATE login_attempts SET bucket=$1, attempts=10 WHERE id=1',
+    values: [Math.floor(Date.now() / 60_000)],
+  });
+  const throttled = await login(process.env.TEST_ADMIN_PASSWORD);
+  assert.match(throttled.headers.get('location'), /error=CredentialsSignin/);
+} finally {
+  await testDb.end();
+}
+const sessionCsrf = await fetch(`${origin}/api/auth/csrf`, {
+  headers: { Cookie: cookie },
+});
+const logoutCsrf = await sessionCsrf.json();
+const logoutCookies = [
+  cookie,
+  ...sessionCsrf.headers.getSetCookie().map((c) => c.split(';')[0]),
+].join('; ');
+const logout = await fetch(`${origin}/api/auth/signout`, {
+  method: 'POST',
+  redirect: 'manual',
+  headers: {
+    Cookie: logoutCookies,
+    'Content-Type': 'application/x-www-form-urlencoded',
+  },
+  body: new URLSearchParams({
+    csrfToken: logoutCsrf.csrfToken,
+    callbackUrl: origin,
+  }),
+});
+assert.ok(
+  logout.headers
+    .getSetCookie()
+    .some((c) => /authjs.session-token=;/.test(c) && /Max-Age=0/.test(c)),
+);
+console.log(
+  'PASS authentication: shared login limit enforced and sign-out clears the session cookie',
 );
