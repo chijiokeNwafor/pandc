@@ -1,5 +1,6 @@
 import WeddingFrame from '@/components/wedding-frame';
 import WeddingGallery from '@/components/wedding-gallery';
+import { galleryImages } from '@/lib/gallery';
 export const metadata = {
   title: 'Gallery | Princess & Chijioke',
   description: 'A first look at Princess and Chijioke’s wedding celebration.',
@@ -16,7 +17,7 @@ export default function Gallery() {
         </h1>
         <p>The beginning of our wedding album.</p>
       </section>
-      <WeddingGallery />
+      <WeddingGallery images={galleryImages} />
     </WeddingFrame>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Image from 'next/image';
-import { Maximize2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Maximize2, Images } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,61 +10,133 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-export default function WeddingGallery() {
-  const [open, setOpen] = useState(false);
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/components/ui/empty';
+import type { GalleryImage } from '@/lib/gallery';
+export default function WeddingGallery({ images }: { images: GalleryImage[] }) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const index = images.findIndex((image) => image.id === selectedId);
+  const selected = index >= 0 ? images[index] : null;
+  function move(direction: number) {
+    const next = images[index + direction];
+    if (next) setSelectedId(next.id);
+  }
   return (
-    <>
-      <figure className="gallery-feature">
-        <Button
-          variant="ghost"
-          className="gallery-artwork"
-          onClick={() => setOpen(true)}
-          aria-label="View the full wedding invitation"
+    <section className="gallery-collection" aria-label="Wedding images">
+      <div className="gallery-collection-heading">
+        <span className="wedding-kicker">OUR ALBUM</span>
+        <span>
+          {images.length} {images.length === 1 ? 'image' : 'images'}
+        </span>
+      </div>
+      {images.length ? (
+        <div
+          className={`gallery-grid ${images.length === 1 ? 'gallery-grid-single' : ''}`}
         >
-          <Image
-            src="/invitation.png"
-            width={1142}
-            height={1600}
-            unoptimized
-            alt="Wedding invitation in emerald green, blush pink, and mint green"
-          />
-          <span className="gallery-enlarge">
-            <Maximize2 size={16} /> View invitation
-          </span>
-        </Button>
-        <figcaption>
-          <span className="wedding-kicker">01 / THE INVITATION</span>
-          <h2>
-            It begins with
-            <br />
-            <em>an invitation.</em>
-          </h2>
-          <p>
-            The colours, the details, and the date. A first look at the
-            celebration to come.
-          </p>
-          <span className="gallery-date">18.12.2026</span>
-        </figcaption>
-      </figure>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="gallery-dialog">
-          <DialogHeader>
-            <DialogTitle>Our wedding invitation</DialogTitle>
-            <DialogDescription>
-              Princess & Chijioke · 18 December 2026
-            </DialogDescription>
-          </DialogHeader>
-          <div className="gallery-lightbox-image">
-            <Image
-              src="/invitation.png"
-              width={1142}
-              height={1600}
-              unoptimized
-              alt="Full invitation with wedding ceremony and reception details"
-            />
-          </div>
+          {images.map((image) => (
+            <figure className="gallery-tile" key={image.id}>
+              <Button
+                variant="ghost"
+                className="gallery-tile-media"
+                onClick={() => setSelectedId(image.id)}
+                aria-label={`Enlarge ${image.title}`}
+              >
+                <Image
+                  src={image.src}
+                  width={image.width}
+                  height={image.height}
+                  unoptimized
+                  alt={image.alt}
+                />
+                <span className="gallery-enlarge">
+                  <Maximize2 size={16} /> View image
+                </span>
+              </Button>
+              <figcaption>
+                <h2>{image.title}</h2>
+                {image.description && <p>{image.description}</p>}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      ) : (
+        <Empty className="gallery-empty">
+          <EmptyHeader>
+            <Images size={30} />
+            <EmptyTitle>The album is ready for its first photograph</EmptyTitle>
+            <EmptyDescription>
+              Images added to the gallery will appear here.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
+      <Dialog
+        open={Boolean(selected)}
+        onOpenChange={(open) => {
+          if (!open) setSelectedId(null);
+        }}
+      >
+        <DialogContent
+          className="gallery-dialog"
+          onKeyDown={(event) => {
+            if (event.key === 'ArrowRight') {
+              event.preventDefault();
+              move(1);
+            } else if (event.key === 'ArrowLeft') {
+              event.preventDefault();
+              move(-1);
+            }
+          }}
+        >
+          {selected && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selected.title}</DialogTitle>
+                <DialogDescription>
+                  {selected.description ||
+                    'Princess & Chijioke · Our wedding gallery'}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="gallery-lightbox-image">
+                <Image
+                  src={selected.src}
+                  width={selected.width}
+                  height={selected.height}
+                  unoptimized
+                  alt={selected.alt}
+                />
+              </div>
+              {images.length > 1 && (
+                <div className="gallery-browse">
+                  <Button
+                    variant="outline"
+                    disabled={index === 0}
+                    onClick={() => move(-1)}
+                    aria-label="Previous image"
+                  >
+                    <ArrowLeft size={16} /> Previous
+                  </Button>
+                  <span aria-live="polite">
+                    {index + 1} of {images.length}
+                  </span>
+                  <Button
+                    variant="outline"
+                    disabled={index === images.length - 1}
+                    onClick={() => move(1)}
+                    aria-label="Next image"
+                  >
+                    Next <ArrowRight size={16} />
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </DialogContent>
       </Dialog>
-    </>
+    </section>
   );
 }
